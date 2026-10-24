@@ -6,13 +6,14 @@
 #include <thread>
 #include <vector>
 #include <X11/Xlib.h>
-#include <X11/Xos.h>
 #include <X11/Xutil.h>
-#define MAX 7                     // On définie le nombre de thread qu'on veut utiliser
+
+#define THREAD_COUNT 7
+
 bool done = false; // Variable qui sert à savoir si on a terminé de créer tous les objets
-std::string a[MAX] = {"Free", "Free", "Free", "Free", "Free", "Free", "Free"};
+std::string a[THREAD_COUNT] = {"Free", "Free", "Free", "Free", "Free", "Free", "Free"};
 // Tableaux tampons pour recevoir les matériaux pour 
-std::string b[MAX] = {"Free", "Free", "Free", "Free", "Free", "Free", "Free"}; // la fabrication et l'affichage.
+std::string b[THREAD_COUNT] = {"Free", "Free", "Free", "Free", "Free", "Free", "Free"}; // la fabrication et l'affichage.
 
 /////////////////////////////////////////////////////////////
 //AJOUTER VOS INCLUDE ET AUTRES ICI!!!!!!!!!!!!!!!!!!!!!!!!//
@@ -26,16 +27,16 @@ std::string b[MAX] = {"Free", "Free", "Free", "Free", "Free", "Free", "Free"}; /
 
 typedef struct
 {
-	std::string name[MAX]{"Argent", "Or", "Bois", "Metal", "Diamant", "Fer", "Jade"};
+	std::string name[THREAD_COUNT]{"Argent", "Or", "Bois", "Metal", "Diamant", "Fer", "Jade"};
 	// Nom des matériaux                              
 
 	std::list<std::string> liste{"Argent", "Or", "Bois", "Metal", "Diamant", "Fer", "Jade"};
 	// Nom des matériaux dans une liste               
 
-	std::string craft_name[MAX]{"Coupe", "Porte", "Table", "Bague", "Chandelier", "Epee", "Bracelet"};
+	std::string craft_name[THREAD_COUNT]{"Coupe", "Porte", "Table", "Bague", "Chandelier", "Epee", "Bracelet"};
 	// Nom des objets fabriqués                
 
-	int craft[MAX]{0, 0, 0, 0, 0, 0, 0}; // 
+	int craft[THREAD_COUNT]{0, 0, 0, 0, 0, 0, 0}; // 
 } craft_t;
 
 
@@ -69,7 +70,6 @@ unsigned long RGB(int r, int g, int b); // Fonction pour convertir les nombres e
 
 void create(int i, craft_t* c)
 {
-	// *** Début fonction create() ***************** //
 	auto it = c->liste.begin(); // Création itérateur it pour faire une recherche.
 	advance(it, 1); // On place l'itérateur à la seconde position de la file pour savoir la valeur.
 
@@ -78,15 +78,14 @@ void create(int i, craft_t* c)
 	/*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 
 	///////////////////////////////////////////////////
-} // *** Fin fonction create() ******************* //
+}
 
 /*!!!!!!!!!! NE PAS TOUCHER !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 void start(craft_t* c)
 {
-	// *** Début fonction start() ****************** //
-	std::vector<std::thread> threads(MAX); // On crée un vecteur de threads.
+	std::vector<std::thread> threads(THREAD_COUNT); // On crée un vecteur de threads.
 	// 
-	for (int i = 0; i < MAX; ++i)
+	for (int i = 0; i < THREAD_COUNT; ++i)
 	{
 		///////////////////////////////////////////////////
 		threads[i] = std::thread([i, c] { create(i, c); }); // La première boucle crée et utilise un thread
@@ -98,7 +97,7 @@ void start(craft_t* c)
 	} ///////////////////////////////////////////////////
 	std::cout << "_____________________________________________" << std::endl;
 	// Ligne permettant de séparer dans le CLI.
-} // *** Fin fonction start() ******************** //
+}
 
 
 /*!!!!!!!!!! NE PAS TOUCHER !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
@@ -145,7 +144,7 @@ int main()
 				if (done != 1)
 				{
 					// Si la frabrication d'objet n'est pas terminé,
-					for (int i = 0; i < MAX; ++i)
+					for (int i = 0; i < THREAD_COUNT; ++i)
 					{
 						// On "reset" la file en remettant chaque ressources,
 						a[i] = b[i] = "Free"; // dans un cas où c'est buggé.
