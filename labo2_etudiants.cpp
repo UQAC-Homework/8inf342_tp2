@@ -1,4 +1,5 @@
 /* NE PAS TOUCHER */
+// ReSharper disable CppUseInternalLinkage
 #include <cstdlib>
 #include <iostream>
 #include <list>
@@ -10,10 +11,14 @@
 
 #define THREAD_COUNT 7
 
-bool done = false; // Variable qui sert à savoir si on a terminé de créer tous les objets
+/// Variable qui sert à savoir si on a terminé de créer tous les objets
+bool done = false;
+
+/// Tableaux tampons pour recevoir les matériaux pour 
 std::string a[THREAD_COUNT] = {"Free", "Free", "Free", "Free", "Free", "Free", "Free"};
-// Tableaux tampons pour recevoir les matériaux pour 
-std::string b[THREAD_COUNT] = {"Free", "Free", "Free", "Free", "Free", "Free", "Free"}; // la fabrication et l'affichage.
+
+/// la fabrication et l'affichage.
+std::string b[THREAD_COUNT] = {"Free", "Free", "Free", "Free", "Free", "Free", "Free"};
 
 /////////////////////////////////////////////////////////////
 //AJOUTER VOS INCLUDE ET AUTRES ICI!!!!!!!!!!!!!!!!!!!!!!!!//
@@ -27,51 +32,66 @@ std::string b[THREAD_COUNT] = {"Free", "Free", "Free", "Free", "Free", "Free", "
 
 typedef struct
 {
+	/// Nom des matériaux                              
 	std::string name[THREAD_COUNT]{"Argent", "Or", "Bois", "Metal", "Diamant", "Fer", "Jade"};
-	// Nom des matériaux                              
 
+	/// Nom des matériaux dans une liste               
 	std::list<std::string> liste{"Argent", "Or", "Bois", "Metal", "Diamant", "Fer", "Jade"};
-	// Nom des matériaux dans une liste               
 
+	/// Nom des objets fabriqués                
 	std::string craft_name[THREAD_COUNT]{"Coupe", "Porte", "Table", "Bague", "Chandelier", "Epee", "Bracelet"};
-	// Nom des objets fabriqués                
 
-	int craft[THREAD_COUNT]{0, 0, 0, 0, 0, 0, 0}; // 
+	///
+	int craft[THREAD_COUNT]{0, 0, 0, 0, 0, 0, 0};
 } craft_t;
 
+/// Sert pour l'affichage du GUI
+Display* dis;
 
-Display* dis; // Sert pour l'affichage du GUI                                    
+/// Sert pour l'affichage du GUI
+int screen;
 
-int screen; // Sert pour l'affichage du GUI                                    
+/// Sert à créer la fenêtre pour le GUI
+Window win;
 
-Window win; // Sert à créer la fenêtre pour le GUI                             
+/// graphic context
+GC gc;
 
-GC gc; // graphic context                                                 
+/// Sert pour les couleurs dans le GUI
+unsigned long black, white, red, blue, green;
 
-unsigned long black, white, red, blue, green; // Sert pour les couleurs dans le GUI                              
+/// Sert pour les coordonnées                                       
+int x, y;
 
-int x, y; // Sert pour les coordonnées                                       
+/// Fonction pour initialiser le GUI                                
+void init();
 
+/// Fonction pour fermer le GUI et le programme                     
+void close();
 
-void init(); // Fonction pour initialiser le GUI                                
+/// Fonction pour rafraîchir l'affichage graphique                  
+void refresh();
 
-void close(); // Fonction pour fermer le GUI et le programme                     
+/// Fonction pour afficher le menu dans le GUI                      
+void menu();
 
-void refresh(); // Fonction pour rafraîchir l'affichage graphique                  
+/// Fonction pour afficher les ressources et les objets fabriqués   
+void afficher(const craft_t* c);
 
-void menu(); // Fonction pour afficher le menu dans le GUI                      
+/// Fonction pour convertir les nombres en couleurs RGB
+unsigned long RGB(int r, int g, int b);
 
-void afficher(craft_t* c); // Fonction pour afficher les ressources et les objets fabriqués   
-
-unsigned long RGB(int r, int g, int b); // Fonction pour convertir les nombres en couleurs RGB             
 /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 
 
 void create(int i, craft_t* c)
 {
-	auto it = c->liste.begin(); // Création itérateur it pour faire une recherche.
-	advance(it, 1); // On place l'itérateur à la seconde position de la file pour savoir la valeur.
+	// Création itérateur it pour faire une recherche.
+	auto it = c->liste.begin();
+
+	// On place l'itérateur à la seconde position de la file pour savoir la valeur.
+	advance(it, 1);
 
 	/*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 	//AJOUTER VOTRE CODE ICI.
@@ -83,85 +103,88 @@ void create(int i, craft_t* c)
 /*!!!!!!!!!! NE PAS TOUCHER !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 void start(craft_t* c)
 {
-	std::vector<std::thread> threads(THREAD_COUNT); // On crée un vecteur de threads.
-	// 
-	for (int i = 0; i < THREAD_COUNT; ++i)
-	{
-		///////////////////////////////////////////////////
-		threads[i] = std::thread([i, c] { create(i, c); }); // La première boucle crée et utilise un thread
-	} // et d'appeler la fonction create().                                             
-	for (auto& t : threads)
-	{
-		// La deuxième boucle permet de joindre les threads
-		t.join(); // au fur et à mesure.
-	} ///////////////////////////////////////////////////
-	std::cout << "_____________________________________________" << std::endl;
-	// Ligne permettant de séparer dans le CLI.
-}
+	// On crée un vecteur de threads.
+	std::vector<std::thread> threads(THREAD_COUNT);
 
+	// La première boucle crée et utilise un thread et d'appeler la fonction create().
+	for (int i = 0; i < THREAD_COUNT; ++i)
+		threads[i] = std::thread([i, c] { create(i, c); });
+
+	// La deuxième boucle permet de joindre les threads au fur et à mesure.
+	for (auto& t : threads)
+		t.join();
+
+	// Ligne permettant de séparer dans le CLI.
+	std::cout << "_____________________________________________" << std::endl;
+}
 
 /*!!!!!!!!!! NE PAS TOUCHER !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 int main()
 {
-	// *** Début fonction main() ******************* //
 	craft_t craft; // Permet de créer l'objet craft, qui va stocker nos informations tout au long du programme.    
 	x = 8;
 	y = 10; // Permet de configurer les coordonnées de bases pour le GUI.
 	init(); // Initilialise le GUI.
 	XEvent event; // Permet de savoir le type d'evenement.
 	char text[1]; // Permet d'entreposer la valeur du clavier.
-	//
+
 	while (true)
 	{
-		///////////////////////////////////////////////////
 		afficher(&craft); // On affiche dans le GUI.
 		y = 10; // On remet le y à 10 pour les prochaines affichages.
 		XNextEvent(dis, &event); // Se prépare à recevoir l'evenement.
+
+		// Si il y a eu un evenement (en appuyant sur le clavier):
 		if (event.type == KeyPress && XLookupString(&event.xkey, text, 255, nullptr, nullptr) == 1)
 		{
-			// Si il y a eu un evenement (en appuyant sur le clavier):
+			// Option "s":
 			if (text[0] == 's')
 			{
-				// Option "s":
+				// Tant que la fabrication n'est pas terminé,
 				if (done != 1)
 				{
-					// Tant que la fabrication n'est pas terminé,
-					start(&craft); // On commence un cycle de fabrication d'objet.
-				} //
-			} // _____________________________________________ //
+					// On commence un cycle de fabrication d'objet.
+					start(&craft);
+				}
+			}
+
+			// Option "r":
 			if (text[0] == 'r')
 			{
-				// Option "r":
+				// Si la frabrication d'objet n'est pas terminé,
 				if (done != 1)
 				{
-					// Si la frabrication d'objet n'est pas terminé,
-					afficher(&craft); // On "rafraîchit" l'affichage.
-				} //
-			} // _____________________________________________ //
+					// On "rafraîchit" l'affichage.
+					afficher(&craft);
+				}
+			}
+
+			// Option "t":
 			if (text[0] == 't')
 			{
-				// Option "t":
+				// Si la frabrication d'objet n'est pas terminé,
 				if (done != 1)
 				{
-					// Si la frabrication d'objet n'est pas terminé,
+					// On "reset" la file en remettant chaque ressources, dans un cas où c'est buggé.
 					for (int i = 0; i < THREAD_COUNT; ++i)
 					{
-						// On "reset" la file en remettant chaque ressources,
-						a[i] = b[i] = "Free"; // dans un cas où c'est buggé.
+						a[i] = b[i] = "Free";
 						craft.liste = {"Argent", "Or", "Bois", "Metal", "Diamant", "Fer", "Jade"}; //
-					} //
-				} //
-			} // _____________________________________________ //
+					}
+				}
+			}
+
+			// Option "q":
 			if (text[0] == 'q')
 			{
-				// Option "q":
-				close(); // On ferme le programme.
-			} //
-		} //
-	} ///////////////////////////////////////////////////
-	//
-	return 0; //
-} // *** Fin fonction main() ********************* //
+				// On ferme le programme.
+				close();
+			}
+		}
+	}
+
+	return 0;
+}
 
 /*!!!!!!!!!! NE PAS TOUCHER !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 
@@ -258,7 +281,7 @@ void menu()
 }
 
 
-void afficher(craft_t* c)
+void afficher(const craft_t* c)
 {
 	y = 10;
 
@@ -270,13 +293,13 @@ void afficher(craft_t* c)
 
 		XSetForeground(dis, gc,BlackPixel(dis, screen));
 
-		XDrawString(dis, win, gc, x, y, c->craft_name[k].c_str(), c->craft_name[k].size());
+		XDrawString(dis, win, gc, x, y, c->craft_name[k].c_str(), c->craft_name[k].size()); // NOLINT(*-narrowing-conversions)
 
 		XDrawString(dis, win, gc, x + 42, y, " : ", 3);
 
 		XSetForeground(dis, gc, blue);
 
-		XDrawString(dis, win, gc, x + 60, y, nbr.c_str(), nbr.size());
+		XDrawString(dis, win, gc, x + 60, y, nbr.c_str(), nbr.size()); // NOLINT(*-narrowing-conversions)
 
 		y = y + 10;
 	}
@@ -297,10 +320,10 @@ void afficher(craft_t* c)
 
 		XSetForeground(dis, gc, red);
 
-		XDrawString(dis, win, gc, x + 102, y, a[k].c_str(), a[k].size());
+		XDrawString(dis, win, gc, x + 102, y, a[k].c_str(), a[k].size()); // NOLINT(*-narrowing-conversions)
 		a[k] = "Free";
 
-		XDrawString(dis, win, gc, x + 152, y, b[k].c_str(), b[k].size());
+		XDrawString(dis, win, gc, x + 152, y, b[k].c_str(), b[k].size()); // NOLINT(*-narrowing-conversions)
 		b[k] = "Free";
 
 		y = y + 10;
