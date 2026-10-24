@@ -10,7 +10,7 @@
 #include <X11/Xutil.h>
 using namespace std;
 #define MAX 7                     // On définie le nombre de thread qu'on veut utiliser
-bool done = 0; // Variable qui sert à savoir si on a terminé de créer tous les objets
+bool done = false; // Variable qui sert à savoir si on a terminé de créer tous les objets
 string a[MAX] = {"Free", "Free", "Free", "Free", "Free", "Free", "Free"};
 // Tableaux tampons pour recevoir les matériaux pour 
 string b[MAX] = {"Free", "Free", "Free", "Free", "Free", "Free", "Free"}; // la fabrication et l'affichage.
@@ -115,7 +115,7 @@ int main()
 	XEvent event; // Permet de savoir le type d'evenement.
 	char text[1]; // Permet d'entreposer la valeur du clavier.
 	//
-	while (1)
+	while (true)
 	{
 		///////////////////////////////////////////////////
 		afficher(&craft); // On affiche dans le GUI.
