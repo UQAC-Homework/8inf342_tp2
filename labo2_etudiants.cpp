@@ -14,10 +14,8 @@
 /// Variable qui sert à savoir si on a terminé de créer tous les objets
 bool done = false;
 
-/// Tableaux tampons pour recevoir les matériaux pour 
+/// Tableaux tampons pour recevoir les matériaux pour la fabrication et l'affichage.
 std::string a[THREAD_COUNT] = {"Free", "Free", "Free", "Free", "Free", "Free", "Free"};
-
-/// la fabrication et l'affichage.
 std::string b[THREAD_COUNT] = {"Free", "Free", "Free", "Free", "Free", "Free", "Free"};
 
 /////////////////////////////////////////////////////////////
@@ -84,8 +82,7 @@ unsigned long RGB(int r, int g, int b);
 /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 
-
-void create(int i, craft_t* c)
+void create(const int i, craft_t* c)
 {
 	// Création itérateur it pour faire une recherche.
 	auto it = c->liste.begin();
