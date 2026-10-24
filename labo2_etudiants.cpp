@@ -8,12 +8,11 @@
 #include <X11/Xlib.h>
 #include <X11/Xos.h>
 #include <X11/Xutil.h>
-using namespace std;
 #define MAX 7                     // On définie le nombre de thread qu'on veut utiliser
 bool done = false; // Variable qui sert à savoir si on a terminé de créer tous les objets
-string a[MAX] = {"Free", "Free", "Free", "Free", "Free", "Free", "Free"};
+std::string a[MAX] = {"Free", "Free", "Free", "Free", "Free", "Free", "Free"};
 // Tableaux tampons pour recevoir les matériaux pour 
-string b[MAX] = {"Free", "Free", "Free", "Free", "Free", "Free", "Free"}; // la fabrication et l'affichage.
+std::string b[MAX] = {"Free", "Free", "Free", "Free", "Free", "Free", "Free"}; // la fabrication et l'affichage.
 
 /////////////////////////////////////////////////////////////
 //AJOUTER VOS INCLUDE ET AUTRES ICI!!!!!!!!!!!!!!!!!!!!!!!!//
@@ -27,13 +26,13 @@ string b[MAX] = {"Free", "Free", "Free", "Free", "Free", "Free", "Free"}; // la 
 
 typedef struct
 {
-	string name[MAX]{"Argent", "Or", "Bois", "Metal", "Diamant", "Fer", "Jade"};
+	std::string name[MAX]{"Argent", "Or", "Bois", "Metal", "Diamant", "Fer", "Jade"};
 	// Nom des matériaux                              
 
-	list<string> liste{"Argent", "Or", "Bois", "Metal", "Diamant", "Fer", "Jade"};
+	std::list<std::string> liste{"Argent", "Or", "Bois", "Metal", "Diamant", "Fer", "Jade"};
 	// Nom des matériaux dans une liste               
 
-	string craft_name[MAX]{"Coupe", "Porte", "Table", "Bague", "Chandelier", "Epee", "Bracelet"};
+	std::string craft_name[MAX]{"Coupe", "Porte", "Table", "Bague", "Chandelier", "Epee", "Bracelet"};
 	// Nom des objets fabriqués                
 
 	int craft[MAX]{0, 0, 0, 0, 0, 0, 0}; // 
@@ -71,7 +70,7 @@ unsigned long RGB(int r, int g, int b); // Fonction pour convertir les nombres e
 void create(int i, craft_t* c)
 {
 	// *** Début fonction create() ***************** //
-	list<string>::iterator it = c->liste.begin(); // Création itérateur it pour faire une recherche.
+	std::list<std::string>::iterator it = c->liste.begin(); // Création itérateur it pour faire une recherche.
 	advance(it, 1); // On place l'itérateur à la seconde position de la file pour savoir la valeur.
 
 	/*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
@@ -85,19 +84,20 @@ void create(int i, craft_t* c)
 void start(craft_t* c)
 {
 	// *** Début fonction start() ****************** //
-	vector<thread> threads(MAX); // On crée un vecteur de threads.
+	std::vector<std::thread> threads(MAX); // On crée un vecteur de threads.
 	// 
 	for (int i = 0; i < MAX; ++i)
 	{
 		///////////////////////////////////////////////////
-		threads[i] = thread([i, c] { create(i, c); }); // La première boucle crée et utilise un thread
+		threads[i] = std::thread([i, c] { create(i, c); }); // La première boucle crée et utilise un thread
 	} // et d'appeler la fonction create().                                             
 	for (auto& t : threads)
 	{
 		// La deuxième boucle permet de joindre les threads
 		t.join(); // au fur et à mesure.
 	} ///////////////////////////////////////////////////
-	cout << "_____________________________________________" << endl; // Ligne permettant de séparer dans le CLI.
+	std::cout << "_____________________________________________" << std::endl;
+	// Ligne permettant de séparer dans le CLI.
 } // *** Fin fonction start() ******************** //
 
 
@@ -267,7 +267,7 @@ void afficher(craft_t* c)
 
 	for (int k = 0; k < 7; k++)
 	{
-		string nbr = to_string(c->craft[k]);
+		std::string nbr = std::to_string(c->craft[k]);
 
 		XSetForeground(dis, gc,BlackPixel(dis, screen));
 
@@ -286,7 +286,7 @@ void afficher(craft_t* c)
 
 	for (int k = 0; k < 7; k++)
 	{
-		string kk = to_string(k + 1);
+		std::string kk = std::to_string(k + 1);
 
 		XSetForeground(dis, gc,BlackPixel(dis, screen));
 
