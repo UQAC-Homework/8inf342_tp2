@@ -70,7 +70,7 @@ unsigned long RGB(int r, int g, int b); // Fonction pour convertir les nombres e
 void create(int i, craft_t* c)
 {
 	// *** Début fonction create() ***************** //
-	std::list<std::string>::iterator it = c->liste.begin(); // Création itérateur it pour faire une recherche.
+	auto it = c->liste.begin(); // Création itérateur it pour faire une recherche.
 	advance(it, 1); // On place l'itérateur à la seconde position de la file pour savoir la valeur.
 
 	/*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
