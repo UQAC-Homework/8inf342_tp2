@@ -118,7 +118,7 @@ int main()
 		afficher(&craft); // On affiche dans le GUI.
 		y = 10; // On remet le y à 10 pour les prochaines affichages.
 		XNextEvent(dis, &event); // Se prépare à recevoir l'evenement.
-		if (event.type == KeyPress && XLookupString(&event.xkey, text, 255, NULL, 0) == 1)
+		if (event.type == KeyPress && XLookupString(&event.xkey, text, 255, nullptr, nullptr) == 1)
 		{
 			// Si il y a eu un evenement (en appuyant sur le clavier):
 			if (text[0] == 's')
@@ -171,7 +171,7 @@ void init()
 	x = 100;
 	y = 100;
 
-	dis = XOpenDisplay((char*)0);
+	dis = XOpenDisplay(nullptr);
 
 	screen = DefaultScreen(dis);
 
@@ -187,11 +187,11 @@ void init()
 
 	win = XCreateSimpleWindow(dis, DefaultRootWindow(dis), 0, 0, 350, 350, 5, black, white);
 
-	XSetStandardProperties(dis, win, "Lab 2 - 8INF342",NULL, None, NULL, 0, NULL);
+	XSetStandardProperties(dis, win, "Lab 2 - 8INF342", nullptr, None, nullptr, 0, nullptr);
 
 	XSelectInput(dis, win, ExposureMask | ButtonPressMask | KeyPressMask);
 
-	gc = XCreateGC(dis, win, 0, 0);
+	gc = XCreateGC(dis, win, 0, nullptr);
 
 	XSetBackground(dis, gc, white);
 
