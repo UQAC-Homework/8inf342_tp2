@@ -318,7 +318,7 @@ void afficher(craft_t* c)
 }
 
 
-unsigned long RGB(int r, int g, int b)
+unsigned long RGB(const int r, const int g, const int b)
 {
 	return b + (g << 8) + (r << 16);
 }
