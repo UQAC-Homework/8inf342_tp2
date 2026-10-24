@@ -1,17 +1,13 @@
 /* NE PAS TOUCHER */
+#include <cstdlib>
 #include <iostream>
-#include <vector>
 #include <list>
-#include <thread>
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <pthread.h>
-#include <chrono>
 #include <string>
+#include <thread>
+#include <vector>
 #include <X11/Xlib.h>
-#include <X11/Xutil.h>
 #include <X11/Xos.h>
+#include <X11/Xutil.h>
 using namespace std;
 #define MAX 7                     // On définie le nombre de thread qu'on veut utiliser
 bool done = 0; // Variable qui sert à savoir si on a terminé de créer tous les objets
