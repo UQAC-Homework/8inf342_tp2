@@ -21,6 +21,80 @@ std::string b[THREAD_COUNT] = {"Free", "Free", "Free", "Free", "Free", "Free", "
 /////////////////////////////////////////////////////////////
 //AJOUTER VOS INCLUDE ET AUTRES ICI!!!!!!!!!!!!!!!!!!!!!!!!//
 
+#include <algorithm>
+#include <cassert>
+#include <mutex>
+
+std::mutex craftCheckMutex;
+
+/// Structure holding the information of an ingredient
+struct Ingredient
+{
+	std::string name;
+	std::mutex mutex = {};
+};
+
+/// Structure holding the information necessary for a craft
+struct Recipe
+{
+	std::string name;
+	Ingredient* ingredients[2];
+};
+
+Ingredient silver = {.name = "Argent",};
+Ingredient gold = {.name = "Or",};
+Ingredient wood = {.name = "Bois",};
+Ingredient metal = {.name = "Metal",};
+Ingredient diamond = {.name = "Diamant",};
+Ingredient iron = {.name = "Fer",};
+Ingredient jade = {.name = "Jade",};
+
+Recipe recipes[THREAD_COUNT] = {
+	{
+		.name = "Coupe",
+		.ingredients = {&gold, &silver},
+	},
+	{
+		.name = "Porte",
+		.ingredients = {&wood, &gold},
+	},
+	{
+		.name = "Table",
+		.ingredients = {&metal, &wood},
+	},
+	{
+		.name = "Bague",
+		.ingredients = {&diamond, &metal},
+	},
+	{
+		.name = "Chandelier",
+		.ingredients = {&iron, &diamond},
+	},
+	{
+		.name = "Épée",
+		.ingredients = {&jade, &iron},
+	},
+	{
+		.name = "Bracelet",
+		.ingredients = {&silver, &jade},
+	},
+};
+
+bool compare_recipe(
+	const std::pair<int, int>& first,
+	const std::pair<int, int>& second
+)
+{
+	return first.second < second.second;
+}
+
+/// Gets the recipe at the given index
+Recipe* get_recipe(const int index)
+{
+	assert(index >= 0 && index < THREAD_COUNT);
+
+	return &recipes[index];
+}
 
 /////////////////////////////////////////////////////////////
 
@@ -82,6 +156,24 @@ unsigned long RGB(int r, int g, int b);
 /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 
+/// Gets the recipe at the given offset
+static int get_recipe(const int offset, const craft_t* craft)
+{
+	constexpr auto size = THREAD_COUNT;
+
+	assert(offset >= 0 && offset < size);
+	assert(craft != nullptr);
+
+	std::pair<int, int> recipe_counts[THREAD_COUNT];
+
+	for (int i = 0; i < THREAD_COUNT; ++i)
+		recipe_counts[i] = std::pair(i, craft->craft[i]);
+
+	std::ranges::sort(recipe_counts, compare_recipe);
+
+	return recipe_counts[offset].first;
+}
+
 void create(const int i, craft_t* c)
 {
 	// Création itérateur it pour faire une recherche.
@@ -93,6 +185,34 @@ void create(const int i, craft_t* c)
 	/*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 	//AJOUTER VOTRE CODE ICI.
 	/*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
+
+	const auto recipe_index = get_recipe(i, c);
+
+	assert(recipe_index >= 0 && recipe_index < THREAD_COUNT);
+
+	const auto recipe = get_recipe(recipe_index);
+
+	assert(recipe != nullptr);
+
+	craftCheckMutex.lock();
+	const auto mutex_index = std::try_lock(
+		recipe->ingredients[0]->mutex,
+		recipe->ingredients[1]->mutex
+	);
+	craftCheckMutex.unlock();
+
+	if (mutex_index == -1)
+	{
+		std::cout << recipe->name << " en création." << std::endl;
+		std::this_thread::sleep_for(std::chrono::milliseconds(200));
+		c->craft[recipe_index]++;
+		recipe->ingredients[0]->mutex.unlock();
+		recipe->ingredients[1]->mutex.unlock();
+	}
+	else
+	{
+		std::cout << recipe->name << " en attente de " << recipe->ingredients[mutex_index]->name << " ." << std::endl;
+	}
 
 	///////////////////////////////////////////////////
 }
