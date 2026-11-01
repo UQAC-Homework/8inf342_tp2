@@ -202,6 +202,9 @@ void create(const int i, craft_t* c)
 
 	if (mutex_index == -1)
 	{
+		a[i] = recipe->ingredients[0]->name;
+		b[i] = recipe->ingredients[1]->name;
+
 		std::cout << recipe->name << " en création." << std::endl;
 		std::this_thread::sleep_for(std::chrono::milliseconds(200));
 		c->craft[recipe_index]++;
@@ -211,6 +214,8 @@ void create(const int i, craft_t* c)
 	else
 	{
 		std::cout << recipe->name << " en attente de " << recipe->ingredients[mutex_index]->name << " ." << std::endl;
+		a[i] = "Waiting";
+		b[i] = "Waiting";
 	}
 
 	///////////////////////////////////////////////////
