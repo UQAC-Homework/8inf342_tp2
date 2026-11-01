@@ -3,7 +3,6 @@
 #include <cstdlib>
 #include <iostream>
 #include <list>
-#include <ranges>
 #include <string>
 #include <thread>
 #include <vector>
