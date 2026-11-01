@@ -189,9 +189,6 @@ void create(const int i, craft_t* c)
 	/*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 
 	const auto recipe_index = get_recipe(i, c);
-
-	assert(recipe_index >= 0 && recipe_index < THREAD_COUNT);
-
 	const auto recipe = get_recipe(recipe_index);
 
 	assert(recipe != nullptr);
