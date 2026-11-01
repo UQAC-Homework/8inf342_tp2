@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <list>
+#include <ranges>
 #include <string>
 #include <thread>
 #include <vector>
@@ -10,6 +11,7 @@
 #include <X11/Xutil.h>
 
 #define THREAD_COUNT 7
+#define MAXIMUM_ITEM_COUNT 10
 
 /// Variable qui sert à savoir si on a terminé de créer tous les objets
 bool done = false;
@@ -210,6 +212,18 @@ void create(const int i, craft_t* c)
 		c->craft[recipe_index]++;
 		recipe->ingredients[0]->mutex.unlock();
 		recipe->ingredients[1]->mutex.unlock();
+
+		if (c->craft[recipe_index] >= MAXIMUM_ITEM_COUNT)
+		{
+			done = std::ranges::all_of(
+				std::cbegin(c->craft),
+				std::cend(c->craft),
+				[](const int count)
+				{
+					return count >= MAXIMUM_ITEM_COUNT;
+				}
+			);
+		}
 	}
 	else
 	{
