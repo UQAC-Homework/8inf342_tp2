@@ -24,9 +24,21 @@ std::string b[THREAD_COUNT] = {"Free", "Free", "Free", "Free", "Free", "Free", "
 
 #include <algorithm>
 #include <cassert>
+#include <fstream>
+#include <chrono>
 #include <mutex>
 
 std::mutex craftCheckMutex;
+std::mutex coutMutex;
+
+std::ofstream sortieFile("sortieCreation.txt", std::ios::out | std::ios::trunc);
+
+int iterationCount = 0;
+int activeThreads = 0;
+int finishedThreads = 0;
+
+bool timerStarted = false;
+std::chrono::steady_clock::time_point threadStartTime;
 
 /// Structure holding the information of an ingredient
 struct Ingredient
@@ -189,6 +201,24 @@ void create(const int i, craft_t* c)
 	//AJOUTER VOTRE CODE ICI.
 	/*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 
+	// 1. Début du cycle : le tout premier thread affiche l'en-tête d'itération
+	{
+		std::lock_guard<std::mutex> lock(coutMutex);
+		if (!timerStarted)
+		{
+			timerStarted = true;
+			threadStartTime = std::chrono::steady_clock::now();
+		}
+		
+		if (activeThreads == 0)
+		{
+			iterationCount++;
+			sortieFile << "-----------------\n"
+			           << "iteration " << iterationCount << std::endl;
+		}
+		activeThreads++;
+	}
+
 	const auto recipe_index = get_recipe(i, c);
 	const auto recipe = get_recipe(recipe_index);
 
@@ -206,7 +236,13 @@ void create(const int i, craft_t* c)
 		a[i] = recipe->ingredients[0]->name;
 		b[i] = recipe->ingredients[1]->name;
 
-		std::cout << recipe->name << " en création." << std::endl;
+		// Protection du message de création
+		{
+			std::lock_guard<std::mutex> lock(coutMutex);
+			std::cout << recipe->name << " en création." << std::endl;
+			sortieFile << recipe->name << " en création." << std::endl;
+		}
+        
 		std::this_thread::sleep_for(std::chrono::milliseconds(200));
 		c->craft[recipe_index]++;
 		recipe->ingredients[0]->mutex.unlock();
@@ -214,7 +250,8 @@ void create(const int i, craft_t* c)
 
 		if (c->craft[recipe_index] >= MAXIMUM_ITEM_COUNT)
 		{
-			done = std::ranges::all_of(
+			// Vérifie si TOUS les objets ont atteint le maximum
+			bool allCompleted = std::ranges::all_of(
 				std::cbegin(c->craft),
 				std::cend(c->craft),
 				[](const int count)
@@ -222,13 +259,44 @@ void create(const int i, craft_t* c)
 					return count >= MAXIMUM_ITEM_COUNT;
 				}
 			);
+
+			if (allCompleted && !done)
+			{
+				done = true;
+				
+				// Arrêt du chronomètre et calcul du temps d'exécution des threads
+				auto threadEndTime = std::chrono::steady_clock::now();
+				std::chrono::duration<double, std::milli> elapsed = threadEndTime - threadStartTime;
+
+				std::lock_guard<std::mutex> lock(coutMutex);
+				std::cout << "---------------------------------------------" << std::endl;
+				std::cout << "Temps total d'exécution des threads : " << elapsed.count() << " ms (" << elapsed.count() / 1000.0 << " secondes)" << std::endl;
+				
+				sortieFile << "Temps total d'exécution des threads : " << elapsed.count() << " ms (" << elapsed.count() / 1000.0 << " secondes)" << std::endl;
+			}
 		}
 	}
 	else
 	{
-		std::cout << recipe->name << " en attente de " << recipe->ingredients[mutex_index]->name << " ." << std::endl;
+		// Protection du message d'attente
+		{
+			std::lock_guard<std::mutex> lock(coutMutex);
+			std::cout << recipe->name << " en attente de " << recipe->ingredients[mutex_index]->name << " ." << std::endl;
+			sortieFile << recipe->name << " en attente de " << recipe->ingredients[mutex_index]->name << " ." << std::endl;
+		}
 		a[i] = "Waiting";
 		b[i] = "Waiting";
+	}
+
+	{
+		std::lock_guard<std::mutex> lock(coutMutex);
+		finishedThreads++;
+		if (finishedThreads == THREAD_COUNT)
+		{
+			sortieFile << "fin iteration " << iterationCount << std::endl;
+			activeThreads = 0;
+			finishedThreads = 0;
+		}
 	}
 
 	///////////////////////////////////////////////////
