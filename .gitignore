@@ -70,3 +70,6 @@ Testing/
 
 # CLion files
 .idea/
+
+# Output
+sortieCreation.txt
